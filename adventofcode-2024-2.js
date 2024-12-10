@@ -1002,64 +1002,28 @@ const input = `
 `;
 
 const isAllPositiveOrNegative = (adjacentArray) => {
-    let firstNumberIsPositive = true;
-    let otherNumberIsPositive = true;
-    let suitable = true;
-    for (let i = 0; i < adjacentArray.length; i++) {
-        if (adjacentArray[i] === 0) {
-            suitable = false;
-            break;
-        };
-
-        if (adjacentArray[0] < 0) firstNumberIsPositive = false;
-        else firstNumberIsPositive = true;
-
-        if (adjacentArray[i] < 0) otherNumberIsPositive = false;
-        else otherNumberIsPositive = true;
-
-        if (firstNumberIsPositive !== otherNumberIsPositive) {
-            suitable = false;
-            break;
-        };
-    }
-    return suitable;
+    return adjacentArray.every(number => number !== 0) &&
+        (
+            adjacentArray.every(number => number > 0) ||
+            adjacentArray.every(number => number < 0)
+        );
 };
 
 const isInAdjacentLevel = (adjacentArray, adjacentLevel) => {
-    let suitable = true;
-    for (let i = 0; i < adjacentArray.length; i++){
-        if(Math.abs(adjacentArray[i]) > adjacentLevel){
-            suitable = false;
-            break;
-        }
-    }
-    return suitable;
+    return adjacentArray.every(number => Math.abs(number) <= adjacentLevel);
 };
 
 const isSafe = (numbers, adjacentLevel) => {
-    const adjacent = numbers.map((number, index) => {
-        return number - numbers[index + 1]
-
-    });
-
-    adjacent.pop();
-
-    if(
-        isAllPositiveOrNegative(adjacent) && 
-        isInAdjacentLevel(adjacent, adjacentLevel)
-    )
-    return true;
-    else return false;
+    const adjacent = numbers.map((number, index) => number - numbers[index + 1]).slice(0,-1); // -1 是從尾端開始數回來
+    return isAllPositiveOrNegative(adjacent) &&
+    isInAdjacentLevel(adjacent, adjacentLevel)
 }
 
-const NumberOfSafeReport = (input)=>{
+const NumberOfSafeReport = (input) => {
     const lines = input.split('\n').filter(Boolean);
-    const safeReport = lines.map((line)=>{
-        return isSafe(line.split(' '),3);
-    });
+    const safeReport = lines.map((line) => isSafe(line.split(' '), 3));
     return safeReport.filter(s => s === true).length;
 
 };
-
 
 console.log(NumberOfSafeReport(input));

@@ -1002,75 +1002,31 @@ const input = `
 `;
 
 const isAllPositiveOrNegative = (adjacentArray) => {
-    let firstNumberIsPositive = true;
-    let otherNumberIsPositive = true;
-    let suitable = true;
-    for (let i = 0; i < adjacentArray.length; i++) {
-        if (adjacentArray[i] === 0) {
-            suitable = false;
-            break;
-        };
-
-        if (adjacentArray[0] < 0) firstNumberIsPositive = false;
-        else firstNumberIsPositive = true;
-
-        if (adjacentArray[i] < 0) otherNumberIsPositive = false;
-        else otherNumberIsPositive = true;
-
-        if (firstNumberIsPositive !== otherNumberIsPositive) {
-            suitable = false;
-            break;
-        };
-    }
-    return suitable;
+    return adjacentArray.every(number => number !== 0) &&
+        adjacentArray.every(number => number < 0) ||
+        adjacentArray.every(number => number > 0)
 };
 
 const isInAdjacentLevel = (adjacentArray, adjacentLevel) => {
-    let suitable = true;
-    for (let i = 0; i < adjacentArray.length; i++) {
-        if (Math.abs(adjacentArray[i]) > adjacentLevel) {
-            suitable = false;
-            break;
-        }
-    }
-    return suitable;
+    return adjacentArray.every(number => Math.abs(number) <= adjacentLevel);
+};
+
+const checkSafety = (numbers, adjacentLevel) => {
+    const adjacent = numbers.map((number, index) => number - numbers[index + 1]).slice(0, -1);
+    return isAllPositiveOrNegative(adjacent) &&
+        isInAdjacentLevel(adjacent, adjacentLevel);
 };
 
 const isSafe = (numbers, adjacentLevel) => {
-    const adjacent = numbers.map((number, index) => {
-        return number - numbers[index + 1]
-    });
+    if (checkSafety(numbers, adjacentLevel)) return true;
 
-    adjacent.pop();
-
-    if (
-        isAllPositiveOrNegative(adjacent) &&
-        isInAdjacentLevel(adjacent, adjacentLevel)
-    )
-        return true;
+    // 將 false 的移除一個數字看能否變 true
     else {
-        let result = false;
-        for (let i = 0; i < numbers.length; i++) {
-            const duplicateNumbers = numbers.slice();
-            duplicateNumbers.splice(i, 1);
-
-            const adjacent2 = duplicateNumbers.map((number, index) => {
-                return number - duplicateNumbers[index + 1]
-            });
-
-            adjacent2.pop();
-
-            if (
-                isAllPositiveOrNegative(adjacent2) &&
-                isInAdjacentLevel(adjacent2, adjacentLevel)
-            ) {
-                result = true;
-                break;
-            }
-        }
-        return result;
+        return numbers.some((_, i) => {
+            const modifiedNumbers = numbers.slice(0, i).concat(numbers.slice(i + 1)); // numbers.slice(i+1)，起始索引為 i+1，到陣列結尾。
+            return checkSafety(modifiedNumbers, adjacentLevel);
+        });
     }
-
 }
 
 const NumberOfSafeReport = (input) => {
@@ -1081,6 +1037,5 @@ const NumberOfSafeReport = (input) => {
     return safeReport.filter(s => s === true).length;
 
 };
-
 
 console.log(NumberOfSafeReport(input));
